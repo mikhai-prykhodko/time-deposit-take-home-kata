@@ -42,7 +42,7 @@ Take-home refactoring kata for a QE/SDET-focused role. The assignment text is in
 - No mocking of the database in persistence/API tests; use Testcontainers (needs Docker running).
 - Unit tests are `*Test` (Surefire, `mvn test`); Docker-backed tests are `*IT` (Failsafe, `mvn verify`).
 - `TimeDepositCalculatorTest` holds the characterization tests. After the commit that adds them, it is frozen: never edit it to make a refactor pass.
-- PIT mutation testing on the domain: the score must not drop below the recorded baseline (legacy calculator: 26/26 mutants killed, 100%, default mutators).
+- PIT mutation testing on the domain: the score must not drop below the recorded baseline (100% killed: 26/26 on the legacy calculator with PIT 1.15; 21/21 after the strategy refactor with PIT 1.20, which generates a different mutant set; default mutators).
 - E2E tests validate responses against `openapi.yaml` (swagger-request-validator).
 - Test names state behaviour (`basicPlan_after30Days_earnsOnePercentMonthly`), not method names.
 - A new behaviour or bug fix needs a test in the same commit.
