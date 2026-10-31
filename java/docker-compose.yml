@@ -1,0 +1,11 @@
+# Local Postgres matching the defaults in application.properties:
+#   docker compose up -d && mvn spring-boot:run
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: timedeposit
+      POSTGRES_USER: timedeposit
+      POSTGRES_PASSWORD: timedeposit
+    ports:
+      - "5432:5432"
