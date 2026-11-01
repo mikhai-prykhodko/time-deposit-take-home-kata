@@ -3,7 +3,8 @@
 Take-home refactoring kata. The assignment text is in `README.md`; this file holds the working rules. Read the README requirements before changing scope.
 
 ## Scope decisions
-- **Language/stack:** Java 17 + Maven in `java/` only. Do not touch `c#/`, `kotlin/`, `python/`, `typescript/`.
+- **Solutions:** Java 17 + Maven in `java/` (complete) and TypeScript in `typescript/` (see the TypeScript section). Do not touch `c#/`, `kotlin/`, `python/`.
+- "Exactly two endpoints" applies per solution; both solutions expose the same two endpoints from the same contract.
 - **Framework:** Spring Boot 3.x (web + Spring Data JPA), Flyway for schema, Postgres via Testcontainers, springdoc for Swagger UI.
 - **Architecture:** Hexagonal (ports and adapters). Keep `domain` free of Spring, JPA and Jackson imports.
 - **Packages:** `TimeDeposit` and `TimeDepositCalculator` stay in `org.ikigaidigital` (moving them is a breaking change). New code goes in `org.ikigaidigital.domain.interest`, `.application`, `.adapter.in.web`, `.adapter.out.persistence`.
@@ -72,3 +73,23 @@ Track in `docs/ai-assistance.md` as work proceeds: tool used, which commits it a
 - Match existing code (package `org.ikigaidigital`, 4-space indent, plain Java). Prefer clear names over comments; comment only assumptions and non-obvious rules.
 - Use `BigDecimal` internally only if it keeps `updateBalance` results identical; otherwise preserve the existing `double` arithmetic exactly.
 - Extensibility goal: adding a new plan = adding one strategy class + registering it, with no edits to existing strategies (open/closed).
+
+## TypeScript solution (`typescript/`)
+Mirrors the Java solution layer by layer; the Java rules above apply unless stated here.
+- **Stack:** Node 24 (engines >= 22), Yarn 1, TypeScript strict, Express 5, `pg` with plain SQL migrations, Jest (Babel transform) + `tsc --noEmit` type-check, `@testcontainers/postgresql`, supertest, StrykerJS, pino with ECS format.
+- **Frozen shared code:** `src/TimeDeposit.ts` (class, constructor `(id, planType, balance, days)`, public fields) and `TimeDepositCalculator.updateBalance(xs: TimeDeposit[])`. Both files stay at their paths in `src/`; moving them breaks imports, which is a breaking change.
+- **Rounding differs from Java:** the TS original rounds with `Math.round((interest + Number.EPSILON) * 100) / 100`. Keep it exactly. Example: basic 1218 gives 1.02 in TS but 1.01 in Java. Characterization values come from running the **TS** original, never from the Java tests.
+- `src/tests/TimeDepositCalculator.test.ts` holds the TS characterization tests and is frozen after the commit that adds them.
+- **Contract-first:** `typescript/openapi/openapi.yaml` is a copy of the Java contract. Types are generated with `openapi-typescript` into `src/generated/` (git-ignored) by the `pre*` scripts.
+- **DB:** same schema and demo data as Java (snake_case, `NUMERIC(19,2)`). `pg` returns NUMERIC as a string: convert only in the Postgres adapter.
+- **Ports:** app 3000, local Postgres (docker compose) 5433, so both solutions can run side by side.
+- Unit tests `*.test.ts` (`yarn test`); Docker-backed `*.it.test.ts` (`yarn test:it`). `yarn verify` = typecheck + unit + integration.
+- **Branch:** all TypeScript work is committed to `typescript-solution`, one or more commits per phase; it is not merged into `main` until the candidate decides.
+
+```bash
+cd typescript
+yarn install
+yarn typecheck && yarn test     # fast
+yarn test:it                    # Docker required
+yarn verify
+```

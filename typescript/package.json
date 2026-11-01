@@ -6,25 +6,28 @@
   "license": "MIT",
   "main": "src/index.ts",
   "scripts": {
-    "dev": "nodemon src/index.ts",
-    "start": "ts-node src/index.ts",
-    "test": "jest src/tests/*.test.ts --watch"
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "jest --selectProjects unit",
+    "test:watch": "jest --selectProjects unit --watch",
+    "test:it": "jest --selectProjects integration --runInBand",
+    "verify": "yarn typecheck && yarn test && yarn test:it"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=22.0.0"
   },
-  "dependencies": {
-    "@babel/core": "7.19.1",
-    "@babel/preset-env": "7.19.1",
-    "@babel/preset-typescript": "7.18.6",
-    "jest": "29.0.3",
-    "ts-node": "^10.9.1",
-    "typescript": "4.8.3"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "@types/jest": "^29.1.1",
-    "@types/node": "18.7.18",
-    "nodemon": "^2.0.20"
+    "@babel/core": "^7.28.0",
+    "@babel/preset-env": "^7.28.0",
+    "@babel/preset-typescript": "^7.27.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^24.0.0",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
   },
   "keywords": []
 }
