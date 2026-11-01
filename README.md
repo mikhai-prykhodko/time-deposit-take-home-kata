@@ -134,7 +134,7 @@ CI (`.github/workflows/ci.yml`) runs `mvn verify` and PIT on every push.
 
 ## Architecture (hexagonal)
 ```
-adapter.in.web           controller generated from openapi.yaml (contract first)
+adapter.in.web           controller implementing the interface generated from openapi.yaml (contract first)
 application              use cases and the ports the core needs (TimeDepositRepository)
 domain.interest          InterestStrategy per plan + registry (no framework code)
 adapter.out.persistence  JPA entities and the adapter behind the repository port
