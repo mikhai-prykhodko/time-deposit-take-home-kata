@@ -5,6 +5,7 @@ import { StudentInterest } from './StudentInterest'
 
 /** Assumption: an unknown plan type earns no interest, as in the original calculator. */
 class NoInterest extends InterestStrategy {
+  // Stryker disable next-line StringLiteral: equivalent mutant, this strategy is never registered so its planType is never read
   readonly planType = ''
 
   protected interestAfterGracePeriod(): number {
@@ -19,10 +20,12 @@ const NO_INTEREST = new NoInterest()
  * InterestStrategy and registering it; existing strategies are not touched.
  */
 export class InterestStrategyRegistry {
-  private readonly strategies: Map<string, InterestStrategy>
+  private readonly strategies = new Map<string, InterestStrategy>()
 
   constructor(strategies: InterestStrategy[]) {
-    this.strategies = new Map(strategies.map((strategy) => [strategy.planType, strategy]))
+    for (const strategy of strategies) {
+      this.strategies.set(strategy.planType, strategy)
+    }
   }
 
   static withDefaultPlans(): InterestStrategyRegistry {
