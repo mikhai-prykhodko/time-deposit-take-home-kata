@@ -3,6 +3,11 @@ package org.ikigaidigital.domain.interest;
 /**
  * Interest rule of one plan type. The grace period common to all plans lives here,
  * so a plan only describes what is specific to it.
+ *
+ * Assumptions, taken from the original calculator (which the assignment calls correct):
+ * the stated rates are annual and one update applies a twelfth of the rate; "no interest for
+ * the first 30 days" means the first interest is earned at day 31; plan types match exactly
+ * and in lower case.
  */
 public interface InterestStrategy {
 
