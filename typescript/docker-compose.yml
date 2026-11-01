@@ -1,0 +1,12 @@
+# Local Postgres for the TypeScript solution, matching the defaults in src/index.ts:
+#   docker compose up -d && yarn start
+# Port 5433 so it can run next to the Java solution's database on 5432.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: timedeposit
+      POSTGRES_USER: timedeposit
+      POSTGRES_PASSWORD: timedeposit
+    ports:
+      - "5433:5432"
