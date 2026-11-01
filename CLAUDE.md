@@ -80,6 +80,7 @@ Mirrors the Java solution layer by layer; the Java rules above apply unless stat
 - **Frozen shared code:** `src/TimeDeposit.ts` (class, constructor `(id, planType, balance, days)`, public fields) and `TimeDepositCalculator.updateBalance(xs: TimeDeposit[])`. Both files stay at their paths in `src/`; moving them breaks imports, which is a breaking change.
 - **Rounding differs from Java:** the TS original rounds with `Math.round((interest + Number.EPSILON) * 100) / 100`. Keep it exactly. Example: basic 1218 gives 1.02 in TS but 1.01 in Java. Characterization values come from running the **TS** original, never from the Java tests.
 - `src/tests/TimeDepositCalculator.test.ts` holds the TS characterization tests and is frozen after the commit that adds them.
+- StrykerJS (`yarn mutation`) mutates the calculator and `src/domain/`; the score must not drop below the baseline (legacy calculator: 49/49 mutants killed, 100%).
 - **Contract-first:** `typescript/openapi/openapi.yaml` is a copy of the Java contract. Types are generated with `openapi-typescript` into `src/generated/` (git-ignored) by the `pre*` scripts.
 - **DB:** same schema and demo data as Java (snake_case, `NUMERIC(19,2)`). `pg` returns NUMERIC as a string: convert only in the Postgres adapter.
 - **Ports:** app 3000, local Postgres (docker compose) 5433, so both solutions can run side by side.

@@ -12,7 +12,8 @@
     "test": "jest --selectProjects unit",
     "test:watch": "jest --selectProjects unit --watch",
     "test:it": "jest --selectProjects integration --runInBand",
-    "verify": "yarn typecheck && yarn test && yarn test:it"
+    "verify": "yarn typecheck && yarn test && yarn test:it",
+    "mutation": "stryker run"
   },
   "engines": {
     "node": ">=22.0.0"
@@ -22,6 +23,8 @@
     "@babel/core": "^7.28.0",
     "@babel/preset-env": "^7.28.0",
     "@babel/preset-typescript": "^7.27.0",
+    "@stryker-mutator/core": "^9",
+    "@stryker-mutator/jest-runner": "^9",
     "@types/jest": "^29.5.14",
     "@types/node": "^24.0.0",
     "babel-jest": "^29.7.0",
