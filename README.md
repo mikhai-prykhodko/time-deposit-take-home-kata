@@ -84,7 +84,7 @@ A junior developer implemented domain logic for a time deposit system but did no
 - The interest rules are the original ones, now one strategy class per plan. `TimeDeposit` and the signature and behaviour of `TimeDepositCalculator.updateBalance` are unchanged; 26 characterization tests pin that behaviour.
 
 ## Run it
-Requirements: JDK 17, Maven 3.9, Docker.
+Requirements: JDK 17, Maven 3.9, Docker. The complete guide (generated classes, database access, Postman, troubleshooting) is in [`docs/guide.md`](docs/guide.md).
 
 **Option A: no local database (Testcontainers starts Postgres for you)**
 ```bash
@@ -140,7 +140,7 @@ domain.interest          InterestStrategy per plan + registry (no framework code
 adapter.out.persistence  JPA entities and the adapter behind the repository port
 org.ikigaidigital        TimeDeposit, TimeDepositCalculator (unchanged public API)
 ```
-More background for non-developers: [`docs/walkthrough.md`](docs/walkthrough.md).
+The API classes under `target/generated-sources` are generated from `openapi.yaml` on every Maven build (nothing to do after a clone beyond `mvn compile`); how that works is explained in [`docs/guide.md`](docs/guide.md#1-the-generated-classes). More background for non-developers: [`docs/walkthrough.md`](docs/walkthrough.md).
 
 ## Assumptions
 - **Table names:** snake_case (`time_deposits`, `plan_type`, `time_deposit_id`) because Postgres lowercases unquoted names; the API keeps the camelCase names from the assignment.
