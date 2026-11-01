@@ -1,6 +1,6 @@
 # What we built (phases 0 to 6), explained for a non-developer
 
-This is written for a senior SDET who reads code but doesn't write backend services daily. Every term is explained when it first appears.
+For the practical how-to (starting the app, database access, Postman, how the generated classes work) see [`guide.md`](guide.md). This is written for a senior SDET who reads code but doesn't write backend services daily. Every term is explained when it first appears.
 
 ## 1. The big picture
 
