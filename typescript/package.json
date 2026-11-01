@@ -27,8 +27,10 @@
     "node": ">=22.0.0"
   },
   "dependencies": {
+    "@elastic/ecs-pino-format": "^1",
     "express": "^5",
     "pg": "^8",
+    "pino": "^9",
     "swagger-ui-express": "^5",
     "yaml": "^2"
   },

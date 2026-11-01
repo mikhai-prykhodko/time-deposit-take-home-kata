@@ -1,6 +1,7 @@
 import { Pool } from 'pg'
 import { MIGRATION_DIR, SEED_DIR, SqlMigrator } from './adapters/out/postgres/SqlMigrator'
 import { createApplication } from './compositionRoot'
+import { logger } from './logger'
 
 /*
  * Server bootstrap. Assumption: the original index.ts was a demo script that did not compile (it called
@@ -16,13 +17,13 @@ export const start = async (url = databaseUrl): Promise<void> => {
   // Schema plus demo data, like the Java app's Flyway locations.
   await new SqlMigrator(pool).migrate(MIGRATION_DIR, SEED_DIR)
   createApplication(pool).listen(port, () => {
-    console.log(`Time deposit API on http://localhost:${port} (Swagger UI: /swagger-ui)`)
+    logger.info(`Time deposit API on http://localhost:${port} (Swagger UI: /swagger-ui)`)
   })
 }
 
 if (require.main === module) {
   start().catch((error) => {
-    console.error(error)
+    logger.error(error)
     process.exit(1)
   })
 }

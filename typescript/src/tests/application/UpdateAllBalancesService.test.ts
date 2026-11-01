@@ -3,8 +3,10 @@ import { TimeDepositCalculator } from '../../TimeDepositCalculator'
 import { UpdateAllBalancesService } from '../../application/UpdateAllBalancesService'
 import { InMemoryTimeDepositRepository } from '../support/InMemoryTimeDepositRepository'
 
+const silentLogger = { info: () => undefined }
+
 const serviceFor = (repository: InMemoryTimeDepositRepository) =>
-  new UpdateAllBalancesService(repository, new TimeDepositCalculator())
+  new UpdateAllBalancesService(repository, new TimeDepositCalculator(), silentLogger)
 
 describe('UpdateAllBalancesService', () => {
   test('stores the balance the calculator produces for every deposit', async () => {
