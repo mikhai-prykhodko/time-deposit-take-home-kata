@@ -143,6 +143,8 @@ org.ikigaidigital        TimeDeposit, TimeDepositCalculator (unchanged public AP
 The API classes under `target/generated-sources` are generated from `openapi.yaml` on every Maven build (nothing to do after a clone beyond `mvn compile`); how that works is explained in [`docs/guide.md`](docs/guide.md#1-the-generated-classes). More background for non-developers: [`docs/walkthrough.md`](docs/walkthrough.md).
 
 ## Assumptions
+The full list with the reasoning behind each (interest rules, API, data, structure, tooling, out of scope) is in [`docs/assumptions.md`](docs/assumptions.md); the main ones are:
+
 - **Table names:** snake_case (`time_deposits`, `plan_type`, `time_deposit_id`) because Postgres lowercases unquoted names; the API keeps the camelCase names from the assignment.
 - **`withdrawals` in the response:** `TimeDeposit` has no such field and must not break, so withdrawals travel in a separate read model (`TimeDepositDetails`) mapped in the adapter.
 - **Update semantics:** each POST applies one month of interest, so it is not idempotent, which is why it is a POST. `days` is not changed (the original code never did).
