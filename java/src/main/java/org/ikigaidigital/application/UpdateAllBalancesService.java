@@ -24,7 +24,12 @@ class UpdateAllBalancesService implements UpdateAllBalancesUseCase {
         this.calculator = calculator;
     }
 
-    /** One transaction: either every balance is updated or none is. */
+    /**
+     * One transaction: either every balance is updated or none is.
+     *
+     * Assumption: simultaneous calls are not coordinated (concurrency control is out of scope), so two
+     * overlapping updates may each read the same balances and apply a single month between them.
+     */
     @Override
     @Transactional
     public void updateAllBalances() {

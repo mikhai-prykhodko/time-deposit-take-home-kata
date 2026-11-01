@@ -5,6 +5,7 @@ import org.ikigaidigital.application.TimeDepositDetails;
 
 import java.util.List;
 
+/** Deposits, and each deposit's withdrawals, are returned ordered by id so responses are stable. */
 public interface TimeDepositRepository {
 
     List<TimeDeposit> findAll();

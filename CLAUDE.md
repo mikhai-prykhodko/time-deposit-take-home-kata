@@ -1,6 +1,6 @@
 # Time Deposit Kata (XA Bank) – Project Guide
 
-Take-home refactoring kata for a QE/SDET-focused role. The assignment text is in `README.md`; this file holds the working rules. Read the README requirements before changing scope.
+Take-home refactoring kata. The assignment text is in `README.md`; this file holds the working rules. Read the README requirements before changing scope.
 
 ## Scope decisions
 - **Language/stack:** Java 17 + Maven in `java/` only. Do not touch `c#/`, `kotlin/`, `python/`, `typescript/`.
