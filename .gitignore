@@ -8,3 +8,7 @@ __pycache__/
 .idea/
 package-lock.json
 .vscode/
+# TypeScript solution
+typescript/.stryker-tmp/
+typescript/reports/
+typescript/src/generated/

@@ -30,6 +30,7 @@ Everything in the repository was written with the AI. The candidate decided scop
 | 4: OpenAPI, use cases, controller | Wrote the contract, generator setup, services, fake repository and slice tests | Same boilerplate reason |
 | 5: end-to-end test, dev runner | Wrote the REST Assured test with contract validation; started the real app and called both endpoints | Wiring a full-stack test is fiddly |
 | 6: ECS logging, compose, CI, README | Wrote configuration and documentation | Boilerplate and writing |
+| TypeScript solution (phases 0 to 6, branch `typescript-solution`) | Analysed the starter, planned the mapping from the Java solution, recorded the TS characterization values by running the original, wrote all code, tests, CI job and docs, and ran every sabotage check again | Same reasons as for Java; the plan was reviewed before any code |
 | Docs: guide, assumptions | Wrote `docs/guide.md` and `docs/assumptions.md`, ran every command in the guide, added the missing assumption comments to the code | The candidate asked for a full how-to and one place listing every assumption with its reasoning |
 
 ## AI mistakes caught
@@ -45,6 +46,8 @@ Everything in the repository was written with the AI. The candidate decided scop
 | First attempt to prove the contract check works (changing `balance` to a string) broke compilation, so it never tested the validator | Output showed no test results | Used a change that still compiles (`maximum: 10` on `days`); the validator then failed with a schema error as expected |
 
 | AI-written docs contained the candidate's private interview-preparation notes (questions for the reviewer, talking points) | The candidate's review before merging | Moved out of the repository into a local, git-excluded file |
+| The TypeScript plan picked node-pg-migrate for migrations; its current releases are ESM-only and do not fit the CommonJS project | Checked before installing it in phase 3 | Replaced by a small Flyway-style runner over the same SQL files, with its own integration test |
+| Stryker found two weak spots in the TypeScript registry: a mutant that crashed before any test ran, and a surviving mutant | Mutation report after the refactor | Rewrote the map construction as a plain loop; the survivor is an equivalent mutant (never-read plan type), excluded with the reason in a comment |
 | The README described the controller as "generated from openapi.yaml"; only its interface is generated | Final review of the README against the code | Corrected the wording |
 
 ## What stayed human

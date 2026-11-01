@@ -5,7 +5,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  java:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -35,3 +35,41 @@ jobs:
             java/target/surefire-reports
             java/target/failsafe-reports
             java/target/pit-reports
+
+  typescript:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: typescript
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: yarn
+          cache-dependency-path: typescript/yarn.lock
+
+      - name: Install
+        run: yarn install --frozen-lockfile
+
+      # Generates the API types from openapi.yaml first (pre-scripts), then type-checks.
+      - name: Typecheck
+        run: yarn typecheck
+
+      - name: Unit tests
+        run: yarn test
+
+      # Testcontainers Postgres; Docker is preinstalled on the runner.
+      - name: Integration and end-to-end tests
+        run: yarn test:it
+
+      - name: Mutation testing
+        run: yarn mutation
+
+      - name: Upload mutation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: typescript-reports
+          path: typescript/reports

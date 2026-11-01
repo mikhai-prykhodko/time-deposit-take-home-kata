@@ -6,7 +6,7 @@ The assignment says: *"In case of ambiguity, make logical assumptions and justif
 - **Assumption**: the assignment did not say, so a reading was chosen.
 - **Decision**: a free choice (tooling, design) where several options were fine.
 
-Contents: [A. Interest rules](#a-interest-rules) · [B. API](#b-api) · [C. Data](#c-data) · [D. Code structure](#d-code-structure) · [E. Tooling and process](#e-tooling-and-process) · [F. Out of scope](#f-out-of-scope)
+Contents: [A. Interest rules](#a-interest-rules) · [B. API](#b-api) · [C. Data](#c-data) · [D. Code structure](#d-code-structure) · [E. Tooling and process](#e-tooling-and-process) · [F. Out of scope](#f-out-of-scope) · [G. TypeScript solution](#g-typescript-solution)
 
 ---
 
@@ -78,7 +78,7 @@ The assignment gives the rules in words and also says the existing `TimeDepositC
 
 | # | Choice | Why |
 |---|---|---|
-| E1 | **Java 17 + Maven**, in `java/` only; the other language folders are untouched | Java and Spring are the expected stack for this kind of service; the toolchain was already installed |
+| E1 | **Java 17 + Maven** in `java/`, plus a TypeScript solution in `typescript/` (section G); `c#/`, `kotlin/` and `python/` are untouched | Java and Spring are the expected stack for this kind of service; the toolchain was already installed |
 | E2 | **Spring Boot 3.5.6**, Spring Data JPA (not plain JDBC) | Conventional for Spring; the entity/adapter split fits hexagonal |
 | E3 | **Testcontainers** with real Postgres for persistence and end-to-end tests; `*Test` = fast, `*IT` = Docker (Failsafe, `mvn verify`) | The assignment prefers Testcontainers; no fake database that could behave differently from production |
 | E4 | **Characterization tests first**, then refactor; that test class is frozen afterwards | Proves "no breaking changes" and the commit order shows it |
@@ -87,6 +87,7 @@ The assignment gives the rules in words and also says the existing `TimeDepositC
 | E7 | **Gatling was not added** | Judged out of scope for this assignment, which has no performance requirement |
 | E8 | One **branch per phase**, atomic commits inside, merged with a merge commit (never squash); work done in a personal fork only | "Follow atomic commit practices"; "do not create a PR or a branch in the ikigai-digital repository" |
 | E9 | **AI-assisted** with Claude Code; rules in `CLAUDE.md` | Required by the assignment; see `docs/ai-assistance.md` |
+
 
 ---
 
@@ -103,3 +104,22 @@ These were deliberately not built, with the reason:
 | F5 | Creating, changing or deleting individual deposits or withdrawals | "Exactly two endpoints" |
 | F6 | Currency handling | Not in the data model |
 | F7 | Load or performance tests | See E7 |
+
+---
+
+## G. TypeScript solution
+
+Everything in sections A to F applies to the TypeScript solution too (same contract, same schema, same rules). These are the points that are specific to it.
+
+| # | Ambiguity or choice | Choice | Why | Where |
+|---|---|---|---|---|
+| G1 | The TS original rounds differently from the Java original: `Math.round((interest + Number.EPSILON) * 100) / 100` | **Assumption:** keep the TS behaviour exactly. Basic 1218 gives 1.015 interest; Java rounds it to 1.01, TS to **1.02** (the EPSILON lifts 101.4999.. to 101.5). | The assignment calls each `updateBalance` correct and forbids changing its behaviour; aligning them would silently change one of them | `TimeDepositCalculator.ts` comment; TS characterization test for 1218 |
+| G2 | The starter's `src/index.ts` did not compile (`new TimeDeposit` with three arguments instead of four) | **Assumption:** it is a demo script, not shared API; first fixed minimally so the project type-checks, then replaced by the server start-up | Needed a working entry point; nothing imports it | `src/index.ts` comment |
+| G3 | "No breaking changes" in TypeScript | **Decision:** `TimeDeposit.ts` and `TimeDepositCalculator.ts` stay at their paths in `src/` with the same exports, constructor and fields; the calculator only gained an optional constructor argument | Moving a file breaks every import of it, the TS equivalent of changing a Java package | `CLAUDE.md`; frozen tests |
+| G4 | node-postgres returns `NUMERIC` as a string | **Decision:** convert with `Number()` when reading and `toFixed(2)` when writing, only in the adapter; dates are read with `to_char` so they are not shifted by the time zone | Keeps the domain on plain numbers, like the shared class | `PostgresTimeDepositRepository` comment; round-trip test |
+| G5 | Migrations | **Decision:** the Java Flyway SQL files are reused as they are, applied by a small Flyway-style `SqlMigrator` with its own `schema_history` table | One schema for both solutions; the planned library (node-pg-migrate) is ESM-only in current releases and does not load cleanly in this CommonJS project | `SqlMigrator` comment; migrator test |
+| G6 | Transactions without a framework | **Decision:** a `TransactionRunner` port; the Postgres implementation runs the work in `BEGIN`/`COMMIT`/`ROLLBACK` | Same "all or nothing" update as Java's `@Transactional` | `TransactionRunner`; commit and rollback tests |
+| G7 | The starter's `test` script only ran in watch mode | **Decision:** `yarn test` runs once (CI needs it to exit); watch mode moved to `yarn test:watch`. Babel-based Jest does not type-check, so `yarn typecheck` (`tsc --noEmit`) was added | Usable in CI; type errors are caught | `package.json` |
+| G8 | Ports | **Decision:** app on 3000, local Postgres (docker compose) on 5433 | Both solutions can run at the same time without their migrations clashing | `docker-compose.yml`, `src/index.ts` |
+| G9 | Where the contract lives | **Decision:** an identical copy in `typescript/openapi/openapi.yaml`; TS types are generated from it | Each solution builds on its own; the copy is byte-identical today | `openapi/` |
+| G10 | Stryker equivalent mutant | **Decision:** `NoInterest.planType` is excluded from mutation with the reason in a comment | The fallback strategy is never registered, so its plan type is never read; no test could tell the difference | `InterestStrategyRegistry.ts` |

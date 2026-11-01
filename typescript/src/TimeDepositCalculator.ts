@@ -1,27 +1,17 @@
 import { TimeDeposit } from './TimeDeposit'
+import { InterestStrategyRegistry } from './domain/interest/InterestStrategyRegistry'
 
 export class TimeDepositCalculator {
+  constructor(private readonly interestStrategies = InterestStrategyRegistry.withDefaultPlans()) {}
+
   public updateBalance(xs: TimeDeposit[]) {
-    for (let i = 0; i < xs.length; i++) {
-      let a = 0
+    for (const deposit of xs) {
+      const interest = this.interestStrategies.forPlan(deposit.planType).monthlyInterest(deposit.balance, deposit.days)
 
-      if (xs[i].days > 30) {
-        if (xs[i].planType === 'student') {
-          if (xs[i].days < 366) {
-            a += (xs[i].balance * 0.03) / 12
-          }
-        } else if (xs[i].planType === 'premium') {
-          if (xs[i].days > 45) {
-            a += (xs[i].balance * 0.05) / 12
-          }
-        } else if (xs[i].planType === 'basic') {
-          a += (xs[i].balance * 0.01) / 12
-        }
-      }
+      // Same rounding as the original: Number.EPSILON lifts values like 1.015 (stored as 1.01499..) to the half cent.
+      const roundedInterest = Math.round((interest + Number.EPSILON) * 100) / 100
 
-      const a2d = Math.round((a + Number.EPSILON) * 100) / 100
-
-      xs[i].balance += a2d
+      deposit.balance += roundedInterest
     }
-  };
+  }
 }
