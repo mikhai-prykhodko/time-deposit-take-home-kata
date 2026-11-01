@@ -14,6 +14,8 @@
     "pretest:it": "yarn -s generate",
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",
+    "predev:containers": "yarn -s generate",
+    "dev:containers": "tsx src/tests/devServer.ts",
     "typecheck": "tsc --noEmit",
     "test": "jest --selectProjects unit",
     "test:watch": "jest --selectProjects unit --watch",
