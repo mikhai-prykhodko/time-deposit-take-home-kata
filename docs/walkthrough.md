@@ -1,6 +1,6 @@
-# What we built (phases 0 to 6), explained for a non-developer
+# What we built (phases 0 to 6), explained for non-developers
 
-For the practical how-to (starting the app, database access, Postman, how the generated classes work) see [`guide.md`](guide.md). This is written for a senior SDET who reads code but doesn't write backend services daily. Every term is explained when it first appears.
+For the practical how-to (starting the app, database access, Postman, how the generated classes work) see [`guide.md`](guide.md). This is written for readers who know testing and can read code but are not backend developers. Every term is explained when it first appears.
 
 ## 1. The big picture
 
@@ -107,7 +107,7 @@ A library that starts a **real Postgres inside Docker** for the duration of a te
 ## 5b. Phase 4: the two endpoints (contract first)
 
 - **OpenAPI** is a standard way to describe a web API in a YAML file: which URLs exist, what you send, what comes back. **Contract first** means we wrote that file (`openapi.yaml`) *before* the code. A Maven plugin then **generates** the Java interface and response classes from it into `target/` (not committed). The controller just implements the generated interface, so the code cannot silently disagree with the contract.
-- **Swagger UI** is a web page (served by the `springdoc` library) that reads the contract and lets anyone click "Try it out" to call the endpoints. This is how the reviewer will try the solution.
+- **Swagger UI** is a web page (served by the `springdoc` library) that reads the contract and lets anyone click "Try it out" to call the endpoints. This is how anyone can try the solution.
 - **Use cases** (`ListTimeDepositsUseCase`, `UpdateAllBalancesUseCase`) are the application's two actions. Updating runs in **one transaction**: all balances change or none do. Their tests use a **fake repository** (a simple in-memory list), so they run in milliseconds without Spring or a database.
 - **Controller slice test:** starts only the web layer with the actions replaced by mocks; checks the JSON fields, the 204, and that the app has **exactly two endpoints** of its own.
 
@@ -154,16 +154,7 @@ java/
 .github/workflows/ci.yml                     CI pipeline
 ```
 
-## 7. Things worth being able to explain in the interview
-
-1. **Why tests first:** to prove "no breaking changes" with evidence, and the commit order shows it.
-2. **Rounding trap (1218 gives 1.01):** a refactor that looks harmless would have changed money.
-3. **Test the tests:** PIT mutation score, and breaking the adapter on purpose to see the test fail.
-4. **Honest mistakes:** PIT crashed after the Spring upgrade (a version mismatch) and we fixed it before pushing; one test of mine was wrong, and the sanity check caught the weak spot.
-5. **Separation of speed:** unit tests in a second, Docker tests only on `mvn verify`.
-6. **Assumptions written in code:** snake_case tables, withdrawals as a read model, unknown plan means no interest.
-
-## 8. Glossary
+## 7. Glossary
 
 | Term | Meaning |
 |---|---|

@@ -6,7 +6,7 @@ The assignment says: *"In case of ambiguity, make logical assumptions and justif
 - **Assumption**: the assignment did not say, so a reading was chosen.
 - **Decision**: a free choice (tooling, design) where several options were fine.
 
-Contents: [A. Interest rules](#a-interest-rules) · [B. API](#b-api) · [C. Data](#c-data) · [D. Code structure](#d-code-structure) · [E. Tooling and process](#e-tooling-and-process) · [F. Out of scope](#f-out-of-scope) · [G. Worth confirming with the reviewer](#g-worth-confirming-with-the-reviewer)
+Contents: [A. Interest rules](#a-interest-rules) · [B. API](#b-api) · [C. Data](#c-data) · [D. Code structure](#d-code-structure) · [E. Tooling and process](#e-tooling-and-process) · [F. Out of scope](#f-out-of-scope)
 
 ---
 
@@ -78,12 +78,12 @@ The assignment gives the rules in words and also says the existing `TimeDepositC
 
 | # | Choice | Why |
 |---|---|---|
-| E1 | **Java 17 + Maven**, in `java/` only; the other language folders are untouched | The job posting names Java/Kotlin and Spring; the toolchain was already installed |
+| E1 | **Java 17 + Maven**, in `java/` only; the other language folders are untouched | Java and Spring are the expected stack for this kind of service; the toolchain was already installed |
 | E2 | **Spring Boot 3.5.6**, Spring Data JPA (not plain JDBC) | Conventional for Spring; the entity/adapter split fits hexagonal |
 | E3 | **Testcontainers** with real Postgres for persistence and end-to-end tests; `*Test` = fast, `*IT` = Docker (Failsafe, `mvn verify`) | The assignment prefers Testcontainers; no fake database that could behave differently from production |
 | E4 | **Characterization tests first**, then refactor; that test class is frozen afterwards | Proves "no breaking changes" and the commit order shows it |
 | E5 | **PIT** mutation testing limited to the domain; PIT 1.20.2 | Shows the tests catch changes. Docker-backed tests are excluded to keep runs fast. The mutant count differs between PIT versions (26 on 1.15, 21 on 1.20); both are 100% killed |
-| E6 | **Extras beyond the assignment:** ECS JSON logging, GitHub Actions CI, a `docker-compose.yml`, a dev runner (`mvn spring-boot:test-run`) | Match the job posting (ELK, DevOps, test automation) and make the project easy to run |
+| E6 | **Extras beyond the assignment:** ECS JSON logging, GitHub Actions CI, a `docker-compose.yml`, a dev runner (`mvn spring-boot:test-run`) | Common practice for a service like this (log aggregation, CI, automated tests) and they make the project easy to run |
 | E7 | **Gatling was not added** | Judged out of scope for this assignment, which has no performance requirement |
 | E8 | One **branch per phase**, atomic commits inside, merged with a merge commit (never squash); work done in a personal fork only | "Follow atomic commit practices"; "do not create a PR or a branch in the ikigai-digital repository" |
 | E9 | **AI-assisted** with Claude Code; rules in `CLAUDE.md` | Required by the assignment; see `docs/ai-assistance.md` |
@@ -103,15 +103,3 @@ These were deliberately not built, with the reason:
 | F5 | Creating, changing or deleting individual deposits or withdrawals | "Exactly two endpoints" |
 | F6 | Currency handling | Not in the data model |
 | F7 | Load or performance tests | See E7 |
-
----
-
-## G. Worth confirming with the reviewer
-
-If the answer to any of these differs from the assumption, the change is small, which is the point of the design:
-
-1. **Are the rates annual (divided by 12), as the original code does, or really 1% / 3% / 5% per month?** Change: the formula in each strategy class. The characterization tests would need to change on purpose, which would make the breaking change visible.
-2. **Should the update also advance `days` by one month?** Change: one extra line in the update use case; the original code does not do it.
-3. **Should the update return the new balances instead of `204`?** Change: one response schema in `openapi.yaml` and the controller.
-4. **Should withdrawals reduce the balance or affect interest?** Change: a new rule in the strategies; currently they are informational.
-5. **Should simultaneous updates be prevented?** Change: a database lock or an idempotency key in the update use case.
