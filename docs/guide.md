@@ -2,6 +2,8 @@
 
 Everything here was checked against the real project (commands run, output compared). Paths are relative to the repository root unless stated.
 
+Sections 1 to 10 cover the Java solution; [section 11](#11-typescript-solution) covers the TypeScript one.
+
 Contents
 1. [The generated classes](#1-the-generated-classes)
 2. [Prerequisites](#2-prerequisites)
@@ -13,6 +15,7 @@ Contents
 8. [Configuration reference](#8-configuration-reference)
 9. [Troubleshooting](#9-troubleshooting)
 10. [Cheat sheet](#10-cheat-sheet)
+11. [TypeScript solution](#11-typescript-solution)
 
 ---
 
@@ -421,3 +424,60 @@ mvn test            # fast
 mvn verify          # + Docker tests
 mvn org.pitest:pitest-maven:mutationCoverage
 ```
+
+---
+
+## 11. TypeScript solution
+
+Same endpoints, contract, schema and demo data as the Java solution; only the tooling differs. All commands run from `typescript/`.
+
+### Prerequisites
+Node 24 (22 or later), Yarn 1 (`npm install --global yarn`), Docker. Then `yarn install`.
+
+### Generated types (the TS equivalent of section 1)
+- The contract is `typescript/openapi/openapi.yaml`, an identical copy of the Java one.
+- `yarn generate` runs `openapi-typescript` and writes `src/generated/api.ts` (git-ignored). You never run it by hand: `yarn typecheck`, `yarn test`, `yarn test:it`, `yarn start`, `yarn dev` and `yarn dev:containers` all run it first (`pre*` scripts).
+- `src/adapters/in/http/createApp.ts` uses the generated `components['schemas']['TimeDepositResponse']` type for the GET response, so a contract change that the code does not follow is a type error in `yarn typecheck`.
+- After a fresh clone: `yarn install && yarn typecheck` is enough.
+
+### Starting the application (port 3000)
+| Option | Commands | Database |
+|---|---|---|
+| A: Testcontainers | `yarn dev:containers` | Throwaway Postgres on a random port, user/password/db `test`, demo data loaded; gone when you stop the app |
+| B: docker compose | `docker compose up -d` then `yarn start` (`docker compose down` to reset) | `localhost:5433`, db/user/password `timedeposit`; data stays while the container exists |
+| C: your own Postgres | `DATABASE_URL=postgres://user:pass@host:5432/db yarn start` | Tables are created on first start |
+
+Other settings: `PORT` (default 3000). Option A prints the database URL on start-up. With option B: `docker compose exec postgres psql -U timedeposit -d timedeposit`.
+
+Applied migrations are recorded in the `schema_history` table (the Java solution uses Flyway's `flyway_schema_history`).
+
+### Calling the API
+- Swagger UI: <http://localhost:3000/swagger-ui>; raw contract: <http://localhost:3000/api-docs>.
+- curl: `curl localhost:3000/time-deposits` and `curl -X POST localhost:3000/time-deposits/balance-updates -i`.
+- Postman: the same requests as in section 5 with port **3000**, or import `http://localhost:3000/api-docs`.
+- Expected balances after one POST on the demo data are the same as in section 5 (1000.83, 2005, 5020.83; the others unchanged). TypeScript prints whole numbers without decimals (`2005`, not `2005.0`).
+
+### Tests
+```bash
+yarn typecheck      # tsc --noEmit
+yarn test           # unit tests (no Docker)
+yarn test:watch     # unit tests in watch mode
+yarn test:it        # Postgres and end-to-end tests (Docker)
+yarn verify         # all of the above
+yarn mutation       # Stryker; HTML report in reports/mutation/index.html
+```
+
+### Logging
+pino with the Elastic ECS formatter, one JSON object per line, for example:
+```json
+{"log.level":"info","@timestamp":"...","ecs.version":"8.10.0","service.name":"time-deposit","message":"Balance update finished: 6 time deposits updated in 7 ms"}
+```
+
+### Troubleshooting
+| Symptom | Fix |
+|---|---|
+| `Cannot find module '../../../generated/api'` in the IDE | Run `yarn generate` once (any `yarn test`/`typecheck` does it too) |
+| `ECONNREFUSED 127.0.0.1:5433` on `yarn start` | Start the database: `docker compose up -d`, or use `yarn dev:containers` |
+| `EADDRINUSE :3000` | Another app uses the port: `PORT=3001 yarn start` |
+| Integration tests fail with a Docker error | Start Docker Desktop; `yarn test` still runs the unit tests |
+
